@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'chat.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -16,6 +17,76 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   final _otpController = TextEditingController();
 
+  bool _isLoading = false;
+
+  // Replace this with your backend signup API URL
+  final String _signupUrl = "http://your-backend-url.com/api/signup";
+
+  Future<void> _signUpUser() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+    final otp = _otpController.text.trim();
+
+    // Input validation
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      _showSnackBar("Please fill all fields");
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showSnackBar("Passwords do not match");
+      return;
+    }
+
+    if (otp.isEmpty) {
+      _showSnackBar("Please enter OTP");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse(_signupUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "password": password, "otp": otp}),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data["success"] == true) {
+          _showSnackBar("Signup Successful!");
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const ChatScreen()),
+          );
+        } else {
+          _showSnackBar(data["message"] ?? "Signup failed");
+        }
+      } else {
+        _showSnackBar("Server Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showSnackBar("Error connecting to server");
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.black87,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,11 +96,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             stops: [0.27, 0.67, 0.90],
-            colors: [
-              Color(0xFF000000), // 27% - #000000
-              Color(0xFF1E1E1E), // 67% - #1E1E1E
-              Color(0xFF666666), // 90% - #666666
-            ],
+            colors: [Color(0xFF000000), Color(0xFF1E1E1E), Color(0xFF666666)],
           ),
         ),
         child: Center(
@@ -38,11 +105,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo
                 SvgPicture.asset('assets/icons/logo.svg', height: 80),
                 const SizedBox(height: 32),
 
-                // Sign Up Text
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -77,7 +142,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Set Password Field
+                // Password Field
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
@@ -146,14 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ChatScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: _isLoading ? null : _signUpUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF555555),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -161,20 +219,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                    child: const Text(
-                      'SIGN UP',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'SIGN UP',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 48),
 
-                // T&C Text
                 const Text(
                   'T&C',
                   style: TextStyle(color: Colors.white70, fontSize: 12),

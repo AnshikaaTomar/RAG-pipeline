@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../models/chatmsg.dart';
 
 class MessageBubble extends StatelessWidget {
-  final ChatMessage message;
+  final ChatModel message;
   final VoidCallback? onRegenerate;
 
   const MessageBubble({Key? key, required this.message, this.onRegenerate})

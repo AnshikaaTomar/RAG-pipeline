@@ -16,7 +16,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
-  List<ChatMessage> messages = [];
+  List<ChatModel> messages = [];
   bool _showDrawer = false;
 
   @override
@@ -24,10 +24,10 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     // Add initial message
     messages.add(
-      ChatMessage(
+      ChatModel(
         text: 'How can I help you?',
         isUser: false,
-        timestamp: DateTime.now(),
+        //timestamp: DateTime.now(),
       ),
     );
   }
@@ -37,10 +37,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       messages.add(
-        ChatMessage(
+        ChatModel(
           text: _messageController.text,
           isUser: true,
-          timestamp: DateTime.now(),
+          //timestamp: DateTime.now(),
         ),
       );
     });
@@ -60,10 +60,10 @@ class _ChatScreenState extends State<ChatScreen> {
     Future.delayed(const Duration(seconds: 1), () {
       setState(() {
         messages.add(
-          ChatMessage(
+          ChatModel(
             text: 'This is a sample response from the bot.',
             isUser: false,
-            timestamp: DateTime.now(),
+            //timestamp: DateTime.now(),
           ),
         );
       });
@@ -80,10 +80,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _regenerateLastBotMessage(int messageIndex) {
     setState(() {
-      messages[messageIndex] = ChatMessage(
+      messages[messageIndex] = ChatModel(
         text: 'This is a regenerated response from the bot.',
         isUser: false,
-        timestamp: DateTime.now(),
+        //timestamp: DateTime.now(),
       );
     });
 

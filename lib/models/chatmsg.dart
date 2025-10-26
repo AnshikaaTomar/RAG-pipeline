@@ -1,13 +1,13 @@
 import 'package:http/http.dart' as http;
 
-class ChatMessage {
+class ChatModel {
   final String text;
   final bool isUser;
-  final DateTime timestamp;
+  //DateTime timestamp;
 
-  ChatMessage({
+  ChatModel({
     required this.text,
     required this.isUser,
-    required this.timestamp,
+    //this.timestamp,
   });
 }
